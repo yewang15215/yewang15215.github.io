@@ -1,0 +1,476 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Live and Learn</title>
+  <subtitle>Think! And Think Again</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://helloingyip.com/"/>
+  <updated>2016-07-11T01:05:38.000Z</updated>
+  <id>http://helloingyip.com/</id>
+  
+  <author>
+    <name>King Yip</name>
+    <email>yewnag15215@gmail.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>VC 运行时库</title>
+    <link href="http://helloingyip.com/2016/06/11/VC%20%E8%BF%90%E8%A1%8C%E6%97%B6%E5%BA%93/"/>
+    <id>http://helloingyip.com/2016/06/11/VC 运行时库/</id>
+    <published>2016-06-11T15:51:24.000Z</published>
+    <updated>2016-07-11T01:05:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="C-运行时库"><a href="#C-运行时库" class="headerlink" title="C 运行时库"></a>C 运行时库</h3><ul>
+<li>C 运行时库与<strong>平台</strong>相关</li>
+<li>C 运行时库 = C 标准库 + 系统相关的库<a id="more"></a> </li>
+<li>一个C 运行库大致包含了如下功能：<ul>
+<li>启动与退出：包括入口函数及入口函数所依赖的其他函数等 </li>
+<li>标准函数：由C语言标准规定的C语言标准库所拥有的函数实现（C标准库）</li>
+<li>I/O：I/O功能的封装和实现，参见上一节中I/O初始化部分</li>
+<li>堆：堆的封装和实现，参见上一节中堆初始化部分</li>
+<li>语言实现：语言中一些特殊功能的实现</li>
+<li>调试：实现调试功能的代码</li>
+</ul>
+</li>
+<li>早期的C Runtimes 并不支持动态链接库，但Visual C++ 4.0 之后已支持，并且在32 位操作系统中已不再有small/large 等内存模式之分。</li>
+</ul>
+<h3 id="VC-运行时库"><a href="#VC-运行时库" class="headerlink" title="VC 运行时库"></a>VC 运行时库</h3><ul>
+<li>根据对<strong>运行时库</strong>的选择，一共有六种：<ul>
+<li>静态链接<ul>
+<li>/ML –&gt; Single-Threaded(static) –&gt; <strong>libc.lib</strong> –&gt; 自MSVC 2005 开始被删除</li>
+<li>/MLd –&gt; Debug Single-Threaded(static) –&gt; <strong>libcd.lib</strong> –&gt; 自MSVC 2005 开始被删除</li>
+<li>/MT –&gt; Multithreaded(static) –&gt; <strong>libcmt.lib</strong> </li>
+<li>/MTd –&gt; Debug Multithreaded(static) –&gt; <strong>libcmtd.lib</strong></li>
+</ul>
+</li>
+<li>动态链接<ul>
+<li>/MD –&gt; Multithreaded DLL –&gt; <strong>msvcrt.lib</strong> –&gt; 依赖<strong>msvcrt<em>xx</em>.dll</strong></li>
+<li>/MDd –&gt; Debug Multithreaded DLL –&gt; <strong>msvcrtd.lib</strong> –&gt; 依赖<strong>msvcrtd<em>xx</em>.dll</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>msvcrt.lib</strong> 是VC 运行时库的动态链接版本（/MD）的<strong>import 函数库</strong>，使用该链接库，程序执行时必须有<strong>msvcrt<em>xx</em>.dll</strong>。</li>
+</ul>
+<h3 id="VC-运行时库-1"><a href="#VC-运行时库-1" class="headerlink" title="VC++ 运行时库"></a>VC++ 运行时库</h3><ul>
+<li>只要程序中<strong>#include</strong> 了任何一个C++ 头文件，如<code>iostream</code> 或 <code>fstream</code>，MSVC 就会在<strong>链接阶段</strong>自动链接C++ 的运行时库</li>
+<li>VC++ 运行时库有四个版本：<ul>
+<li>静态链接<ul>
+<li>libcpmt.lib</li>
+<li>libcpmtd.lib</li>
+</ul>
+</li>
+<li>动态链接<ul>
+<li>msvcprt.lib –&gt; 依赖<strong>msvcp<em>xx</em>.dll</strong></li>
+<li>msvcprtd.lib –&gt; 依赖<strong>msvcpd<em>xx</em>.dll</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="Windows-API"><a href="#Windows-API" class="headerlink" title="Windows API"></a>Windows API</h1><ul>
+<li>Windows 程序调用的函数可分为C Runtimes 以及Windows API 两大部分</li>
+<li>Windows API，由操作系统本身（主要是Windows三大模块GDI32.DLL和USER32.DLL和KERNEL32.DLL）提供</li>
+<li>虽说动态链接是在执行时期才发生“链接”事实，但在链接时期，链接器仍需先为调用者（应用程序本身）准备一些适当的信息，才能够在执行时期顺利“跳”到DLL中执行。如果该API所属的函数库尚未加载，系统也才因此知道要先行加载该函数库。这些适当的信息放在所谓的<strong>import 函数库</strong>中</li>
+<li>Windows发展至今，逐渐加上的一些新的API函数并不放在GDI和USER和KERNEL三大模块中，而是放在诸如COMMDLG.DLL、TOOLHELP.DLL之中。如果要使用这些APIs，链接时还得加上这些DLLs所对应的import函数库，诸如COMDLG32.LIB和TH32.LIB</li>
+</ul>
+<h3 id="Windows-三大模块"><a href="#Windows-三大模块" class="headerlink" title="Windows 三大模块"></a>Windows 三大模块</h3><ul>
+<li>import 函数库<ul>
+<li>GDI –&gt; Gdi32.Lib</li>
+<li>USER –&gt; User32.Lib</li>
+<li>KERNEL –&gt; Kernel32.Lib</li>
+</ul>
+</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;C-运行时库&quot;&gt;&lt;a href=&quot;#C-运行时库&quot; class=&quot;headerlink&quot; title=&quot;C 运行时库&quot;&gt;&lt;/a&gt;C 运行时库&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;C 运行时库与&lt;strong&gt;平台&lt;/strong&gt;相关&lt;/li&gt;
+&lt;li&gt;C 运行时库 = C 标准库 + 系统相关的库
+    
+    </summary>
+    
+      <category term="programming" scheme="http://helloingyip.com/categories/programming/"/>
+    
+    
+      <category term="C" scheme="http://helloingyip.com/tags/C/"/>
+    
+      <category term="VC" scheme="http://helloingyip.com/tags/VC/"/>
+    
+      <category term="runtime" scheme="http://helloingyip.com/tags/runtime/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>从CGI、FastCGI、php-fpm 说起</title>
+    <link href="http://helloingyip.com/2016/04/18/%E4%BB%8ECGI%E3%80%81FastCGI%E3%80%81php-fpm%20%E8%AF%B4%E8%B5%B7/"/>
+    <id>http://helloingyip.com/2016/04/18/从CGI、FastCGI、php-fpm 说起/</id>
+    <published>2016-04-18T14:06:24.000Z</published>
+    <updated>2016-07-11T01:05:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="mod-php、CGI、FastCGI"><a href="#mod-php、CGI、FastCGI" class="headerlink" title="mod_php、CGI、FastCGI"></a><a href="https://www.wikiwand.com/en/List_of_Apache_modules" target="_blank" rel="external">mod_php</a>、<a href="https://www.wikiwand.com/en/Common_Gateway_Interface" target="_blank" rel="external">CGI</a>、<a href="https://www.wikiwand.com/en/FastCGI" target="_blank" rel="external">FastCGI</a></h3><p>PHP 解释器的执行，主要有三者模式，mod_php、CGI 和FastCGI。</p>
+<ul>
+<li>mode_php 是Apache 的一个模块，把PHP 解释器嵌入到Apache 进程中。</li>
+<li>CGI 和FastCGI 分别是一种协议。Web Server 实现了CGI 或FastCGI 协议的相应的应用程序（<strong>以下简称CGI 或FastCGI</strong>），就可以启动PHP 解释器处理PHP 请求。它们都是以独立进程的形式存在。</li>
+<li>mode_php 和FastCGI 在 单个进程中可以处理多个请求，CGI 在单个进程中只能处理一个请求。<a id="more"></a> 
+</li>
+</ul>
+<h3 id="php-cgi-是一种CGI-协议的实现。"><a href="#php-cgi-是一种CGI-协议的实现。" class="headerlink" title="php-cgi 是一种CGI 协议的实现。"></a>php-cgi 是一种<strong>CGI 协议的实现</strong>。</h3><ul>
+<li><strong>php-cgi 其实就是PHP 解析器</strong>。</li>
+<li>在CGI 模式时，当Web Server 收到 xx/index.php 请求时，会启动php-cgi，php-cgi 会解析php.ini 文件，初始化环境，然后根据请求参数进行处理，再返回处理后的结果。(都是以CGI 协议规范来进行)</li>
+<li>php-cgi 在每个请求时都会启动一个进程，然后读取php.ini 进行解析，可想而知效率相对比较低。</li>
+<li>php-cgi 无法实现平滑重启。修改php.ini 配置后，后面启动的php-cgi 程序还是不会感知。</li>
+</ul>
+<h3 id="php-fpm-即FastCGI-Process-Management，是一种FastCGI-协议的实现。"><a href="#php-fpm-即FastCGI-Process-Management，是一种FastCGI-协议的实现。" class="headerlink" title="php-fpm 即FastCGI Process Management，是一种FastCGI 协议的实现。"></a><a href="http://php.net/manual/zh/install.fpm.php" target="_blank" rel="external">php-fpm</a> 即FastCGI Process Management，是一种<strong>FastCGI 协议的实现</strong>。</h3><ul>
+<li>当请求到来时，php-fpm 启动并读取php.ini 文件完成初始化环境，然后启动一个master，再启动多个worker。当请求过来时，master 会传递给一个worker，然后等待下一个请求。php-fpm 会动态配置worker 的数量。</li>
+<li>一个php-fpm 进程可以处理多个请求，会启动多个php-cgi 程序。</li>
+<li>php-fpm 可以实现平衡重启。修改php.ini 后，当启用新的worker 会使用新的配置。</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;mod-php、CGI、FastCGI&quot;&gt;&lt;a href=&quot;#mod-php、CGI、FastCGI&quot; class=&quot;headerlink&quot; title=&quot;mod_php、CGI、FastCGI&quot;&gt;&lt;/a&gt;&lt;a href=&quot;https://www.wikiwand.com/en/List_of_Apache_modules&quot;&gt;mod_php&lt;/a&gt;、&lt;a href=&quot;https://www.wikiwand.com/en/Common_Gateway_Interface&quot;&gt;CGI&lt;/a&gt;、&lt;a href=&quot;https://www.wikiwand.com/en/FastCGI&quot;&gt;FastCGI&lt;/a&gt;&lt;/h3&gt;&lt;p&gt;PHP 解释器的执行，主要有三者模式，mod_php、CGI 和FastCGI。&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;mode_php 是Apache 的一个模块，把PHP 解释器嵌入到Apache 进程中。&lt;/li&gt;
+&lt;li&gt;CGI 和FastCGI 分别是一种协议。Web Server 实现了CGI 或FastCGI 协议的相应的应用程序（&lt;strong&gt;以下简称CGI 或FastCGI&lt;/strong&gt;），就可以启动PHP 解释器处理PHP 请求。它们都是以独立进程的形式存在。&lt;/li&gt;
+&lt;li&gt;mode_php 和FastCGI 在 单个进程中可以处理多个请求，CGI 在单个进程中只能处理一个请求。
+    
+    </summary>
+    
+      <category term="Programming" scheme="http://helloingyip.com/categories/Programming/"/>
+    
+    
+      <category term="PHP" scheme="http://helloingyip.com/tags/PHP/"/>
+    
+      <category term="CGI" scheme="http://helloingyip.com/tags/CGI/"/>
+    
+      <category term="fast-cgi" scheme="http://helloingyip.com/tags/fast-cgi/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>多账号或多网站使用Git</title>
+    <link href="http://helloingyip.com/2016/03/11/%E5%A4%9A%E8%B4%A6%E5%8F%B7%E6%88%96%E5%A4%9A%E7%BD%91%E7%AB%99%E4%BD%BF%E7%94%A8Git/"/>
+    <id>http://helloingyip.com/2016/03/11/多账号或多网站使用Git/</id>
+    <published>2016-03-11T07:08:14.000Z</published>
+    <updated>2016-07-11T01:05:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="https://github.com" target="_blank" rel="external">GitHub</a> 的Public Repositories 免费，Private Repositories 收费，而<a href="https://bitbucket.org/" target="_blank" rel="external">Bitbucket</a> 正相反，所以自然而然，愿意公开项目放到GitHub 上面，而不想公开的项目放到Bitbucket。</p>
+<h2 id="配置方法"><a href="#配置方法" class="headerlink" title="配置方法"></a>配置方法</h2><p>(以下说明均在Windows 环境下) <a id="more"></a></p>
+<hr>
+<ul>
+<li>注册<a href="https://github.com" target="_blank" rel="external">GitHub</a> 和<a href="https://bitbucket.org/" target="_blank" rel="external">Bitbucket</a> 账号。</li>
+<li><a href="https://git-scm.com/" target="_blank" rel="external">下载Git Bash</a>。</li>
+<li><p>生成SSH key，<a href="https://help.github.com/articles/generating-an-ssh-key/" target="_blank" rel="external">以GitHub 为例</a>：</p>
+<ul>
+<li>假如你有两个账号：countA@gamil.com (常用) 和 countB@gmail.com，都分别注册了GitHub 和Bitbucket。</li>
+<li><p>在<strong>C:\Users\you\.ssh</strong> 目录右键打开安装好的Git Bash，输入<br><code>ssh-keygen -t rsa -b 4096 -C &quot;countA@gamil.com&quot;</code><br>回车，会弹出</p>
+<blockquote>
+<p>Enter a file in which to save the key (/Users/you/.ssh/id_rsa):</p>
+</blockquote>
+<p><strong>直接回车</strong>，再输入两遍密码，在<strong>C:\Users\you\.ssh</strong> 目录会生成两个文件：id_rsa 和id_rsa.pub。</p>
+</li>
+<li><p>再次在Git Bash 中输入<br><code>ssh-keygen -t rsa -b 4096 -C &quot;countB@gamil.com&quot;</code><br>回车，弹出</p>
+<blockquote>
+<p>Enter a file in which to save the key (/Users/you/.ssh/id_rsa): </p>
+</blockquote>
+<p>这回输入<strong>countB</strong>，回车，输入两遍密码，在<strong>C:\Users\you\.ssh</strong> 目录会生成两个文件：countB 和countB.pub。</p>
+</li>
+</ul>
+</li>
+<li><p>把生成的和id_rsa.pub 和acountB.pub 的内容<a href="https://help.github.com/articles/adding-a-new-ssh-key-to-your-github-account/" target="_blank" rel="external">添加到GitHub 上</a>。</p>
+</li>
+<li><p>在<strong>C:\Users\you\.ssh</strong> 目录创建文件<em>config</em>，内容如下：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">Host acountAgit</div><div class="line">    HostName github.com</div><div class="line">    <span class="keyword">User</span> <span class="title">git</span></div><div class="line">    PreferredAuthentications publickey</div><div class="line">    IdentityFile ~/.ssh/id_rsa</div><div class="line">Host acountBgit</div><div class="line">    HostName github.com</div><div class="line">    <span class="keyword">User</span> <span class="title">git</span></div><div class="line">    PreferredAuthentications publickey</div><div class="line">    IdentityFile ~/.ssh/acountB</div><div class="line">Host acountAbit</div><div class="line">    HostName bitbucket.org</div><div class="line">    <span class="keyword">User</span> <span class="title">git</span></div><div class="line">    PreferredAuthentications publickey</div><div class="line">    IdentityFile ~/.ssh/id_rsa</div><div class="line">Host acountBbit</div><div class="line">    HostName bitbucket.org</div><div class="line">    <span class="keyword">User</span> <span class="title">git</span></div><div class="line">    PreferredAuthentications publickey</div><div class="line">    IdentityFile ~/.ssh/acountB</div></pre></td></tr></table></figure>
+</li>
+<li><p>在<strong>C:\Users\you</strong> 目录创建文件<em>.profile</em>，内容如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># <span class="doctag">Note:</span> ~/.ssh/environment should not be used, as it</span></div><div class="line"><span class="comment">#       already has a different purpose in SSH.</span></div><div class="line"></div><div class="line">env=~/.ssh/agent.env</div><div class="line"></div><div class="line"><span class="comment"># <span class="doctag">Note:</span> Don't bother checking SSH_AGENT_PID. It's not used</span></div><div class="line"><span class="comment">#       by SSH itself, and it might even be incorrect</span></div><div class="line"><span class="comment">#       (for example, when using agent-forwarding over SSH).</span></div><div class="line"></div><div class="line"><span class="function"><span class="title">agent_is_running</span></span>() &#123;</div><div class="line">    <span class="keyword">if</span> [ <span class="string">"<span class="variable">$SSH_AUTH_SOCK</span>"</span> ]; <span class="keyword">then</span></div><div class="line">        <span class="comment"># ssh-add returns:</span></div><div class="line">        <span class="comment">#   0 = agent running, has keys</span></div><div class="line">        <span class="comment">#   1 = agent running, no keys</span></div><div class="line">        <span class="comment">#   2 = agent not running</span></div><div class="line">        ssh-add <span class="_">-l</span> &gt;/dev/null 2&gt;&amp;1 || [ $? <span class="_">-eq</span> 1 ]</div><div class="line">    <span class="keyword">else</span></div><div class="line">        <span class="literal">false</span></div><div class="line">    <span class="keyword">fi</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="title">agent_has_keys</span></span>() &#123;</div><div class="line">    ssh-add <span class="_">-l</span> &gt;/dev/null 2&gt;&amp;1</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="title">agent_load_env</span></span>() &#123;</div><div class="line">    . <span class="string">"<span class="variable">$env</span>"</span> &gt;/dev/null</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="title">agent_start</span></span>() &#123;</div><div class="line">    (<span class="built_in">umask</span> 077; ssh-agent &gt;<span class="string">"<span class="variable">$env</span>"</span>)</div><div class="line">    . <span class="string">"<span class="variable">$env</span>"</span> &gt;/dev/null</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">if</span> ! agent_is_running; <span class="keyword">then</span></div><div class="line">    agent_load_env</div><div class="line"><span class="keyword">fi</span></div><div class="line"></div><div class="line"><span class="comment"># if your keys are not stored in ~/.ssh/id_rsa or ~/.ssh/id_dsa, you'll need</span></div><div class="line"><span class="comment"># to paste the proper path after ssh-add</span></div><div class="line"><span class="keyword">if</span> ! agent_is_running; <span class="keyword">then</span></div><div class="line">    agent_start</div><div class="line">    ssh-add</div><div class="line"><span class="keyword">elif</span> ! agent_has_keys; <span class="keyword">then</span></div><div class="line">    ssh-add</div><div class="line"><span class="keyword">fi</span></div><div class="line"></div><div class="line"><span class="built_in">unset</span> env</div></pre></td></tr></table></figure>
+</li>
+<li><p>关闭Git Bash，再重新打开，会弹出</p>
+<blockquote>
+<p>Enter passphrase for /c/Users/you/.ssh/id_rsa:</p>
+</blockquote>
+<p>输入密码后回车，会弹出</p>
+<blockquote>
+<p>Identity added: /c/Users/you/.ssh/id_rsa (/c/Users/you/.ssh/id_rsa)</p>
+</blockquote>
+<p>在Git Bash 中输入<br><code>ssh -T acountAgit</code><br>会弹出</p>
+<blockquote>
+<p>Hi yourGitHubacountA! You’ve successfully authenticated, but GitHub does not provide shell access.</p>
+</blockquote>
+</li>
+<li><p><strong>使用第二个账号</strong><br>在<strong>C:\Users\you\.ssh</strong> 中右键打开Git Bash 输入<br><code>ssh-add acountB</code><br>会弹出</p>
+<blockquote>
+<p>Enter passphrase for /c/Users/you/.ssh/<br>接着输入密码后回车，会弹出<br>Identity added: /c/Users/you/.ssh/id_rsa (/c/Users/you/.ssh/id_rsa)</p>
+</blockquote>
+<p>接着输入<br><code>ssh -T acountBgit</code><br>会弹出</p>
+<blockquote>
+<p>Hi yourGitHubAcountB! You’ve successfully authenticated, but GitHub does not provide shell access.</p>
+</blockquote>
+</li>
+<li><p>至此，配置完成！</p>
+</li>
+</ul>
+<hr>
+<h2 id="一些解释"><a href="#一些解释" class="headerlink" title="一些解释"></a>一些解释</h2><ul>
+<li><em>config</em> 文件是配置多网站或多账号的基础</li>
+<li><a href="https://help.github.com/articles/working-with-ssh-key-passphrases/" target="_blank" rel="external"><em>.profile</em> 文件</a>是使每次启动Git Bash 时<strong>自动登陆ssh-agent</strong>。</li>
+<li>使用三个以上的网站，比如还有使用国内的gitcafe 等，使用三个以上的账号，配置方法都是类似的，在config 中增加相应配置就好了。</li>
+<li>以github 的clone 为例，假如你的acountA账号create 或clone 了一个repository，叫yourProject，想clone 到本地，本地命名为yourProj<br><code>git clone acountAgit:yourGitHubAcountA/yourProject.git yourProj</code></li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;a href=&quot;https://github.com&quot;&gt;GitHub&lt;/a&gt; 的Public Repositories 免费，Private Repositories 收费，而&lt;a href=&quot;https://bitbucket.org/&quot;&gt;Bitbucket&lt;/a&gt; 正相反，所以自然而然，愿意公开项目放到GitHub 上面，而不想公开的项目放到Bitbucket。&lt;/p&gt;
+&lt;h2 id=&quot;配置方法&quot;&gt;&lt;a href=&quot;#配置方法&quot; class=&quot;headerlink&quot; title=&quot;配置方法&quot;&gt;&lt;/a&gt;配置方法&lt;/h2&gt;&lt;p&gt;(以下说明均在Windows 环境下)
+    
+    </summary>
+    
+      <category term="Programing" scheme="http://helloingyip.com/categories/Programing/"/>
+    
+    
+      <category term="Git" scheme="http://helloingyip.com/tags/Git/"/>
+    
+      <category term="GitHub" scheme="http://helloingyip.com/tags/GitHub/"/>
+    
+      <category term="Bitbucket" scheme="http://helloingyip.com/tags/Bitbucket/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>《未麻的部屋》观影记录</title>
+    <link href="http://helloingyip.com/2015/11/14/%E3%80%8A%E6%9C%AA%E9%BA%BB%E7%9A%84%E9%83%A8%E5%B1%8B%E3%80%8B/"/>
+    <id>http://helloingyip.com/2015/11/14/《未麻的部屋》/</id>
+    <published>2015-11-14T08:26:04.000Z</published>
+    <updated>2016-07-11T01:05:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="电影相关"><a href="#电影相关" class="headerlink" title="电影相关"></a>电影相关</h2><ul>
+<li><strong>电影名称</strong>：<ul>
+<li>日文原名：パーフェクト ブルー</li>
+<li>英文译名：Perfect Blue</li>
+<li>中文译名：未麻的部屋</li>
+</ul>
+</li>
+<li>上映日期: 1997-07(加拿大奇幻电影节) / 1998-02-28(日本)</li>
+<li>导演：今敏<ul>
+<li>生卒日期: 1963-10-12 至 2010-08-24</li>
+<li>代表作：<ul>
+<li><a href="http://movie.douban.com/subject/1395091/" target="_blank" rel="external">未麻的部屋</a> (1997)</li>
+<li><a href="http://movie.douban.com/subject/1307394/" target="_blank" rel="external">千年女优</a> (2001)</li>
+<li><a href="http://movie.douban.com/subject/1310177/" target="_blank" rel="external">东京教父</a> (2003)</li>
+<li><a href="http://movie.douban.com/subject/1865703/" target="_blank" rel="external">红辣椒</a> (2006) <a id="more"></a></li>
+</ul>
+</li>
+<li>简介：(Quote from <a href="http://www.wikiwand.com/zh-hans/%E4%BB%8A%E6%95%8F" target="_blank" rel="external">WikiPedia</a>)<blockquote>
+<p>今敏（日语：こん さとし，1963年10月12日－2010年8月24日）是日本动画导演、动画师、编剧和漫画家，同时也是日本动画从业人员协会（英语：Japanese Animation Creators Association）会员。他出生于北海道札幌市，自武藏野美术大学造形研究科视觉传达设计系毕业后，便曾参与多部动画作品的制作，以及担任《千年女优》、《盗梦侦探》等重要代表作的导演。他本人是不属于任何动画制作公司的独立导演，不过执导的作品都是由MADHOUSE制作。今敏的多部作品中，具有个性鲜明但贴近现实生活的人物、角色精神层面的探讨描写、梦境与现实间的暧昧关系等元素，也在国际间获得众多奖项。在作品《妄想代理人》中，他使用“鳄渊良宏”作为自己的笔名。他的哥哥今刚（日语：今剛），则是日本流行音乐界著名的吉他手和伴奏音乐家。</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li>编剧：村井贞之</li>
+<li>主要成就：<ul>
+<li>1997年亚洲奇幻电影节最佳亚洲影片</li>
+</ul>
+</li>
+</ul>
+<h2 id="剧情解读"><a href="#剧情解读" class="headerlink" title="剧情解读"></a>剧情解读</h2><ol>
+<li><ul>
+<li>Q: 第一场戏是在儿童乐园里正在进行给小朋友看的战队表演，而偶像团体CHAM的歌迷在外头聊着八卦。</li>
+<li>A: 以下引用自<em><a href="http://www.bilibili.com/video/av2019917/" target="_blank" rel="external">【今敏讲座】未麻的部屋 Perfect Blue</a></em> 中导演今敏的话：<blockquote>
+<ul>
+<li>如果是真人的话，这服装底下一定会有人【注：指的是开场那几个战士的服装】。我想表现的是他们带着mask。</li>
+<li>电影也算是一种创作，例如论文，听说你现在正在为论文烦恼是吧。写论文前先要写摘要，告诉大家作者要写的内容，一开始会先写出来的吧，这就是这里的目的，告诉观众接下来是关于面具的故事。</li>
+<li>观众没注意到也没关系，这种地方，会表现出制作者在拍摄时采取的是什么态度，对观众来说，只要在看第二次的时候觉察到就可以了。</li>
+<li>面具也叫persona，原本是拉丁文，英文叫person，personality，这个字是从persona过来的，语源就是persona。也就是除了有面具的意思外，还有从中流露出的个性与人格。想要强调这些意思，也就是要告诉观众，perfert blue这部电影，故事是在描述关于人所戴的面具，将这种复杂的意涵，透过这给小孩看的特摄片传达。</li>
+<li>被这几位战士打倒的角色叫king bug，这个名字是从bug（程式错误）来的，意思是程式错误之王，也就是说他们的战斗，是为了维护网路的和平与秩序。也就是说，活在闪光灯下的主角，因为错误的出现，即恶劣的歌迷，因为不正常的歌迷害得主角的人格产生许多错误，这就是我想表达的意涵。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><ul>
+<li>Q: 最后是成为名演员的未麻前往医院探望留美.</li>
+<li>A: 以下引用自<em><a href="http://www.bilibili.com/video/av2019917/" target="_blank" rel="external">【今敏讲座】未麻的部屋 Perfect Blue</a></em> 中导演今敏的话：<blockquote>
+<ul>
+<li>这个部分，未麻来探望精神似乎出了问题的留美，她应该还以为自己是未麻吧。经过一番成长的未麻在一旁看着留美，重点是她是隔着玻璃在看的，这是我当时的想法，他并非直接看着留美，而是隔着玻璃这层滤镜在看，也就是说，她是站在客观的立场，就是这么回事，客观地看着留美。</li>
+<li>在这一幕里，被医生叫住的未麻说，“我知道我已经见不到她了，可是，都是因为有她才会有今天的我”，这里的“她”指的是过去很照顾未麻的经纪人留美，同时也是指过去的未麻自己，所以现在的她应该是一个成功的演员，又或者她已经不是演员了。总之在事件发生之后，她已经有名到护士可以认出她来了，也就是说，她之所以能成功，是因为有之前当偶像的自己，今天才能有这种成就，因为有留美当时一直照顾她，所以才会有现在的自己。至于留美，留美是受制于以前的自己已经走不出来的人，被关在反射出自己的镜中世界也就是空想的世界里，而未麻则是打倒了那个想要束缚她的过去的自己，她实际上也打败了那个过去的自己，这么做之后，她才能迈向人生的下一个阶段，也代表了<strong>成长的未麻</strong>和<strong>受制于过去的留美</strong>之间的差异。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><ul>
+<li>Q: 未麻亲自演出在舞台上遭到强暴的戏，当正在进行激烈的拍摄时，未麻在意识逐渐模糊的状态下，了解到自己已经挥别了身为偶像的过去。</li>
+<li>A: 以下引用自<em><a href="http://www.bilibili.com/video/av2019917/" target="_blank" rel="external">【今敏讲座】未麻的部屋 Perfect Blue</a></em> 中导演今敏的话：<blockquote>
+<ul>
+<li>说实话，我觉得自己玩过头了。现在回想起来，这作品原来是一部OVA，并不打算在戏院放映，所以要尽可能引发话题，因为OVA也不会有什么宣传，如果能放进一些刺激的场面比较能引起注意，所以我才放进去了。我真的是玩过头了。像是美少女、色情、暴力、杀人、跟踪狂这种低级的要素就像是八卦节目的梗，至于要怎么组合呢？只要在这里下点功夫。作品里使用的题材，也就是低级的要素，就算是很肮脏的东西，只要组合方式不同，应该就能产生新的东西，所以我就尝试了一下，但是这里做得太过火了。我在大银幕上看到这一幕的时候，不禁把头低了下去。</li>
+<li>这场戏开始时未麻坐在地上的画面,这里虽然也是想表达出她害臊的姿势，必须是封闭的姿势。一开始要封闭，总不能遮都不遮等开演吧，像这样遮住的姿势被渐渐打开是很重要的，我在她的姿势上也下了功夫。根据我实际上问到的结果，听说要拍这种戏时，参观的人真的会变多，里面有几个镜头就是要表现出参观的人比平常多，就连跟拍戏无关的人也到现场了。</li>
+<li>在这一幕里，实际上，虽然她被强暴了，但这其实只是工作。但因为身边的人也有考虑到她的心情，所以她不想给大家带来困扰。对方那种体贴的表现（指戏里强暴她的观众），反而让她更痛苦，对她越温柔，反而让她越难过，心里会有这种矛盾。</li>
+<li>透过让未麻挑战这种戏，表示身为偶像的未麻即将死去，也就是偶像的她要死了。所以这里跳脱衣舞时的服装之所以跟CHAM的服装很像，都是因为想强调身为偶像的她要被杀了，所以才让她穿上那种暴露的衣服，这部分是我想的，设定也是我画的，虽然有人骂我这套衣服太下流了。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><ul>
+<li>Q: 拖着疲惫身躯的未麻回家后，发现了一件事，那就是热带鱼死了。后面看到鱼缸里还剩下的两条热带鱼。</li>
+<li>A: 以下引用自<em><a href="http://www.bilibili.com/video/av2019917/" target="_blank" rel="external">【今敏讲座】未麻的部屋 Perfect Blue</a></em> 中导演今敏的话：  <blockquote>
+<ul>
+<li>未麻把房间弄乱，这部作品里描写的房间，就代表那个角色本身。内心层面。所以这里代表她的心情非常混乱，而且想要自暴自弃，这就是这一幕的意涵。之后她痛哭了一场，在这场痛哭之后，她听见了虚拟未麻的声音，在电脑银幕上看到了对方。</li>
+<li>鱼缸里剩下的两条热带鱼，重点在于为什么是两条鱼，这个意思是未麻体内的两条热带鱼，代表两个未麻，虚拟未麻和想要在演员之路上努力的未麻。这里本来是要让这两条鱼互相追逐，如果这么做的话，就可以清楚表现出那层涵义，也就是心中的两个未麻要进行所谓的生存竞争。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><ul>
+<li>Q: 关于最后一幕，未麻上车后摘下太阳眼镜，这时候她说了最后一句台词“我可是货真价实的未麻喔”，这里为什么要用镜子里的影像呢？</li>
+<li>A: 以下引用自<em><a href="http://www.bilibili.com/video/av2019917/" target="_blank" rel="external">【今敏讲座】未麻的部屋 Perfect Blue</a></em> 中导演今敏的话：<blockquote>
+<ul>
+<li>我也忘记是谁问的，大概是我去外国参加影展时有人这么问过我，未麻对着镜子这样说，一定是在表示那是谎言吧。其实我在做的时候，并没有想欺骗大家，而是经过了这次事件，未麻已经成熟了一些，和以前的她已经不一样了，换句话说，就是成长了，但是，因为告别了过去的自己就成长了，人类的成长应该没那么简单吧，并不是说成长了一次之后就不需要再成长了，而是打破自己之前的价值观，经历痛苦混沌的时期，在那之中重新构筑自己，让自己成为更成熟的大人，我想这个过程会一直反复下去。如果这里不是以镜子里的未麻，而是以未麻的正面来呈现，感觉一切就到此结束了，所以，这里是要表现一切还没结束，其实一切都还没完成，也就是说，她对“我是货真价实的未麻喔”这句话还抱有怀疑，我个人的解释是这样，所以并不是真正的自己完成了，而是继续探寻下去，才会让她成为真正的自己。</li>
+<li>其他还可以有很多解释，这样也很好，有各种解释不是比较多元吗，所以，<strong>我做的解释不一定是正确的，用别的角度来解释镜子里的她也可以</strong>。让观众有更多想象空间果然还是比较好。</li>
+</ul>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p><em><a href="http://www.bilibili.com/video/av2019917/" target="_blank" rel="external">【今敏讲座】未麻的部屋 Perfect Blue</a></em>  中导演今敏的话中值得一提的还有：</p>
+<blockquote>
+<ul>
+<li>动画这种表现方式，每一幕都有导演的意图存在。<br>   如果是真人电影有时候还会不小心拍到一些东西，导演当然是抱着某些意图在拍的，但是，就算是抱着什么意图，例如朝天空拍的时候，总不能说云的形状也是导演的意图吧。动画的话就全部都是了，没有意图的东西就不会出现，虽然会有些没处理好的画，也会有搞砸的地方，基本上都必须刻意去画出来，没有的话根本没办法画。</li>
+<li>把电视机拆了研究每个零件就看不了电视了，整体的东西应该用整体的观点去欣赏比较好。虽然这么说，但我还是做了很多啰嗦的解释。</li>
+</ul>
+</blockquote>
+</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;电影相关&quot;&gt;&lt;a href=&quot;#电影相关&quot; class=&quot;headerlink&quot; title=&quot;电影相关&quot;&gt;&lt;/a&gt;电影相关&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;电影名称&lt;/strong&gt;：&lt;ul&gt;
+&lt;li&gt;日文原名：パーフェクト ブルー&lt;/li&gt;
+&lt;li&gt;英文译名：Perfect Blue&lt;/li&gt;
+&lt;li&gt;中文译名：未麻的部屋&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;上映日期: 1997-07(加拿大奇幻电影节) / 1998-02-28(日本)&lt;/li&gt;
+&lt;li&gt;导演：今敏&lt;ul&gt;
+&lt;li&gt;生卒日期: 1963-10-12 至 2010-08-24&lt;/li&gt;
+&lt;li&gt;代表作：&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;http://movie.douban.com/subject/1395091/&quot;&gt;未麻的部屋&lt;/a&gt; (1997)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://movie.douban.com/subject/1307394/&quot;&gt;千年女优&lt;/a&gt; (2001)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://movie.douban.com/subject/1310177/&quot;&gt;东京教父&lt;/a&gt; (2003)&lt;/li&gt;
+&lt;li&gt;&lt;a href=&quot;http://movie.douban.com/subject/1865703/&quot;&gt;红辣椒&lt;/a&gt; (2006)
+    
+    </summary>
+    
+      <category term="Film" scheme="http://helloingyip.com/categories/Film/"/>
+    
+    
+      <category term="Animation" scheme="http://helloingyip.com/tags/Animation/"/>
+    
+      <category term="Five-star" scheme="http://helloingyip.com/tags/Five-star/"/>
+    
+      <category term="Satoshi Kon 今敏" scheme="http://helloingyip.com/tags/Satoshi-Kon-%E4%BB%8A%E6%95%8F/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MinGW 与Cygwin 的区别</title>
+    <link href="http://helloingyip.com/2015/01/07/MinGW%20%E4%B8%8ECygwin%20%E7%9A%84%E5%8C%BA%E5%88%AB/"/>
+    <id>http://helloingyip.com/2015/01/07/MinGW 与Cygwin 的区别/</id>
+    <published>2015-01-07T08:07:44.000Z</published>
+    <updated>2016-07-11T01:05:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<ol>
+<li>从目标上说</li>
+</ol>
+<ul>
+<li>MinGW 是让Windows 用户可以用上GNU 工具，比如GCC。</li>
+<li>Cygwin 提供完整的类Unix 环境，Windows 用户不仅可以使用GNU 工具，理论上Linux 上的程序只要用Cygwin 重新编译，就可以在Windows 上运行。<a id="more"></a></li>
+</ul>
+<ol>
+<li>从能力上说</li>
+</ol>
+<ul>
+<li>如果程序只用到C/C++ 标准库，可以用MinGW 或Cygwin 编译。</li>
+<li>如果程序还用到了POSIX API，则只能用Cygwin 编译。</li>
+</ul>
+<ol>
+<li>从依赖上说</li>
+</ol>
+<ul>
+<li>程序经MinGW 编译后可以直接在Windows 上面运行。</li>
+<li>程序经Cygwin 编译后运行，需要依赖安装时附带的cygwin1.dll。</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;ol&gt;
+&lt;li&gt;从目标上说&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;MinGW 是让Windows 用户可以用上GNU 工具，比如GCC。&lt;/li&gt;
+&lt;li&gt;Cygwin 提供完整的类Unix 环境，Windows 用户不仅可以使用GNU 工具，理论上Linux 上的程序只要用Cygwin 重新编译，就可以在Windows 上运行。
+    
+    </summary>
+    
+      <category term="Programming" scheme="http://helloingyip.com/categories/Programming/"/>
+    
+    
+      <category term="MinGW" scheme="http://helloingyip.com/tags/MinGW/"/>
+    
+      <category term="Cygwin" scheme="http://helloingyip.com/tags/Cygwin/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>i++ 与++i 的区别</title>
+    <link href="http://helloingyip.com/2015/01/07/i++%20%E4%B8%8E++i%20%E7%9A%84%E5%8C%BA%E5%88%AB/"/>
+    <id>http://helloingyip.com/2015/01/07/i++ 与++i 的区别/</id>
+    <published>2015-01-07T07:50:48.000Z</published>
+    <updated>2016-07-11T01:05:38.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>i++ 与 ++i 的主要区别有两个：</p>
+<ul>
+<li>i++ 返回原来的值，++i 返回加1后的值。</li>
+<li>i++ 不能作为左值，而++i 可以。<a id="more"></a>
+很多人都知道第一点（不清楚的看下文章后面的实现代码就了然了），所以我们重点说下第二点。<br>首先解释下什么是左值（以下两段引用自<a href="https://www.wikiwand.com/zh-hans/%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8" target="_blank" rel="external">中文维基百科</a>）。<blockquote>
+<p>左值是对应内存中有确定存储地址的对象的表达式的值，而右值是所有不是左值的表达式的值。</p>
+</blockquote>
+</li>
+</ul>
+<p>一般来说，左值是可以放到赋值符号左边的变量。但</p>
+<blockquote>
+<p>能否被赋值不是区分左值与右值的依据。比如，C++的const左值是不可赋值的；而作为临时对象的右值可能允许被赋值。左值与右值的根本区别在于是否允许取地址&amp;运算符获得对应的内存地址。</p>
+</blockquote>
+<p>比如，<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> i = <span class="number">0</span>;</div><div class="line"><span class="keyword">int</span> p1 = &amp;(++i); <span class="comment">//正确</span></div><div class="line"><span class="keyword">int</span> p2 = &amp;(i++); <span class="comment">//错误</span></div><div class="line"></div><div class="line">++i = <span class="number">1</span>; <span class="comment">//正确</span></div><div class="line">i++ = <span class="number">5</span>; <span class="comment">//错误</span></div></pre></td></tr></table></figure></p>
+<p>那么为什么<strong>i++ 不能作为左值，而++i 可以</strong>？<br>看它们各自的实现就一目了然了：<br>以下代码来自<a href="http://blog.csdn.net/zlhy_/article/details/8349300" target="_blank" rel="external">CSDN 博客</a><br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 前缀形式：</span></div><div class="line"><span class="keyword">int</span>&amp; <span class="keyword">int</span>::<span class="keyword">operator</span>++() <span class="comment">//这里返回的是一个引用形式，就是说函数返回值也可以作为一个左值使用</span></div><div class="line">&#123;<span class="comment">//函数本身无参，意味着是在自身空间内增加1的</span></div><div class="line">  *<span class="keyword">this</span> += <span class="number">1</span>;  <span class="comment">// 增加</span></div><div class="line">  <span class="keyword">return</span> *<span class="keyword">this</span>;  <span class="comment">// 取回值</span></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//后缀形式:</span></div><div class="line"><span class="keyword">const</span> <span class="keyword">int</span> <span class="keyword">int</span>::<span class="keyword">operator</span>++(<span class="keyword">int</span>) <span class="comment">//函数返回值是一个非左值型的，与前缀形式的差别所在。</span></div><div class="line">&#123;<span class="comment">//函数带参，说明有另外的空间开辟</span></div><div class="line">  <span class="keyword">int</span> oldValue = *<span class="keyword">this</span>;  <span class="comment">// 取回值</span></div><div class="line">  ++(*<span class="keyword">this</span>);  <span class="comment">// 增加</span></div><div class="line">  <span class="keyword">return</span> oldValue;  <span class="comment">// 返回被取回的值</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>如上所示，i++ 最后返回的是一个临时变量，而<strong>临时变量是右值</strong>。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;i++ 与 ++i 的主要区别有两个：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;i++ 返回原来的值，++i 返回加1后的值。&lt;/li&gt;
+&lt;li&gt;i++ 不能作为左值，而++i 可以。
+    
+    </summary>
+    
+      <category term="Programming" scheme="http://helloingyip.com/categories/Programming/"/>
+    
+    
+      <category term="C/C++" scheme="http://helloingyip.com/tags/C-C/"/>
+    
+  </entry>
+  
+</feed>
